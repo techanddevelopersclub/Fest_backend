@@ -19,7 +19,7 @@ class RBACPermsRepository {
 
   static async getPermissionsForRole(role) {
     const perms = await RBACPerms.findOne({ role });
-    return perms ? perms.permissions : [];
+    return perms ? perms.permissions : null;
   }
 
   static async updatePermissionsForRole(role, newPermissions) {

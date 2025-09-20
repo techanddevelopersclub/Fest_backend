@@ -45,11 +45,15 @@ class RBACService {
       console.log("Updating permissions for role:", role);
       console.log("Permissions to set:", permissions);
       
+      // Check what roles exist in the database
+      const allRoles = await RBACPerms.find({}, { role: 1 });
+      console.log("All roles in database:", allRoles.map(r => r.role));
+      
       const perms = await RBACPermsRepository.getPermissionsForRole(role);
       console.log("Current permissions for role:", perms);
       
-      if (!perms || perms.length === 0) {
-        console.log("No permissions found for role:", role);
+      if (!perms) {
+        console.log("Role not found in database:", role);
         throw new BadRequestError("Role not found");
       }
 
