@@ -67,7 +67,7 @@ require("./src/sockets")(wss);
 require("./src/workers");
 
 // server port
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 // listen on port
 server.listen(PORT, () => {
