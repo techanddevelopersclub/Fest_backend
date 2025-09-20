@@ -14,24 +14,30 @@ class RBACController {
     }
   }
 
-  static async getAllActions(req, res) {
+  static async getAllActions(req, res, next) {
     try {
+      console.log("Getting all actions...");
       const actions = await RBACService.getAllActions();
+      console.log("Actions retrieved:", actions);
       return res.status(200).json({
         actions,
       });
     } catch (err) {
+      console.error("Error getting actions:", err);
       next(err);
     }
   }
 
-  static async getAllPermissions(req, res) {
+  static async getAllPermissions(req, res, next) {
     try {
+      console.log("Getting all permissions...");
       const permissions = await RBACService.getAllPermissions();
+      console.log("Permissions retrieved:", permissions);
       return res.status(200).json({
         permissions,
       });
     } catch (err) {
+      console.error("Error getting permissions:", err);
       next(err);
     }
   }
