@@ -46,14 +46,35 @@ FeatureFlagService.initFeatureFlags(() => {
   console.log("Feature flags initialised");
 });
 
-// cors
+// cors - More permissive for debugging
 const corsOptions = {
   credentials: true,
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://fest-frontend-icx7.vercel.app"
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://fest-frontend-icx7.vercel.app",
+      "https://fest-frontend-icx7-ivxkako6s-cieszycs-projects.vercel.app"
+    ];
+    
+    // Add environment variable origins if they exist
+    if (process.env.ALLOWED_ORIGINS) {
+      allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(","));
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
 
