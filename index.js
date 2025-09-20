@@ -10,6 +10,27 @@ app.get("/", async (req, res) => {
   res.send(`Festify API - Home<br/>User Agent: ${req.headers["user-agent"]}`);
 });
 
+// serve manifest.json without authentication
+app.get("/manifest.json", (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.json({
+    "short_name": "Festify",
+    "name": "Festify: Manage Fests and Events",
+    "description": "Festify is a web app that helps you manage your fests and events. It is a one stop solution for all your fest related problems.",
+    "icons": [
+      {
+        "src": "favicon.ico",
+        "sizes": "64x64 32x32 24x24 16x16",
+        "type": "image/x-icon"
+      }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#ffffff"
+  });
+});
+
 // connect to database
 require("./database");
 
@@ -28,7 +49,11 @@ FeatureFlagService.initFeatureFlags(() => {
 // cors
 const corsOptions = {
   credentials: true,
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : ["http://localhost:3000"],
+  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://fest-frontend-icx7-ivxkako6s-cieszycs-projects.vercel.app"
+  ],
 };
 app.use(cors(corsOptions));
 
