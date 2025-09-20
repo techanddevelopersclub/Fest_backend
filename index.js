@@ -52,7 +52,7 @@ const corsOptions = {
   origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://fest-frontend-icx7-ivxkako6s-cieszycs-projects.vercel.app"
+    "https://fest-frontend-icx7.vercel.app"
   ],
 };
 app.use(cors(corsOptions));
