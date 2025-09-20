@@ -42,8 +42,16 @@ class RBACService {
 
   static async updatePermissions(role, permissions) {
     try {
+      console.log("Updating permissions for role:", role);
+      console.log("Permissions to set:", permissions);
+      
       const perms = await RBACPermsRepository.getPermissionsForRole(role);
-      if (!perms) throw new BadRequestError("Role not found");
+      console.log("Current permissions for role:", perms);
+      
+      if (!perms || perms.length === 0) {
+        console.log("No permissions found for role:", role);
+        throw new BadRequestError("Role not found");
+      }
 
       // cannot remove permissions:read and permissions:update from admin
       if (role === "admin") {
@@ -52,11 +60,13 @@ class RBACService {
       }
 
       permissions = [...new Set(permissions)]; // Remove duplicates
+      console.log("Final permissions to save:", permissions);
 
       await RBACPermsRepository.updatePermissionsForRole(role, permissions);
 
       this.initPermissions();
     } catch (err) {
+      console.error("Error updating permissions:", err);
       throw err;
     }
   }

@@ -9,11 +9,17 @@ class RBACPermsRepository {
   }
 
   static async getAllPermissions() {
-    return permissions;
+    const perms = await RBACPerms.find();
+    const permissionsMap = {};
+    perms.forEach(perm => {
+      permissionsMap[perm.role] = perm.permissions;
+    });
+    return permissionsMap;
   }
 
   static async getPermissionsForRole(role) {
-    return permissions[role] || [];
+    const perms = await RBACPerms.findOne({ role });
+    return perms ? perms.permissions : [];
   }
 
   static async updatePermissionsForRole(role, newPermissions) {

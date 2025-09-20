@@ -45,16 +45,22 @@ class RBACController {
   static async updatePermissions(req, res, next) {
     try {
       const { permissionsMap } = req.body;
+      console.log("Received permissions map:", permissionsMap);
+      
       if (!permissionsMap) {
         throw new BadRequestError("No permissions map in request body");
       }
+      
       for (const { role, permissions } of permissionsMap) {
+        console.log("Processing role:", role, "with permissions:", permissions);
         await RBACService.updatePermissions(role, permissions);
       }
+      
       return res.status(200).json({
         message: "Permissions updated successfully",
       });
     } catch (err) {
+      console.error("Error in updatePermissions controller:", err);
       next(err);
     }
   }
