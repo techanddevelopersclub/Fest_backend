@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "dev": "nodemon index.js",
+    "dev": "nodemon server.js",
+    "dev:vercel": "nodemon index.js",
     "build": "node config/esbuild.js",
     "start": "node dist/build.js",
+    "start:local": "node server.js",
     "vercel-build": "npm run build"
   },
   "author": "",

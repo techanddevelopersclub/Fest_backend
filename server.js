@@ -1,6 +1,8 @@
 const express = require("express");
+const http = require("http");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const { WebSocketServer } = require("ws");
 require("dotenv").config();
 
 const app = express();
@@ -54,5 +56,23 @@ app.use("/api", require("./src/routes/index.js"));
 const { handleErrors } = require("./src/utils/errors");
 app.use(handleErrors);
 
-// For Vercel serverless functions, export the app directly
-module.exports = app;
+// create server and socket
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+// socket init
+require("./src/sockets")(wss);
+
+// worker init
+require("./src/workers");
+
+// server port
+const PORT = process.env.PORT || 5000;
+
+// listen on port
+server.listen(PORT, () => {
+  console.log("Server is listening on port", PORT);
+});
+
+// export wss for global socket usage
+module.exports = { wss };
