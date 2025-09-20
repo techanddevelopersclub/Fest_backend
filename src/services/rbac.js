@@ -7,10 +7,13 @@ const RBACPerms = require("../models/RBACPerms")(applicationDB);
 class RBACService {
   static async initPermissions(callback) {
     try {
-      const perms = await RBACPerms.find();
+      console.log("Initializing permissions...");
+      let perms = await RBACPerms.find();
+      console.log("Found existing permissions:", perms.length);
 
       // If no permissions are found, insert default permissions
       if (!perms || perms.length === 0) {
+        console.log("No permissions found, inserting default permissions...");
         const defaultPerms = [
           { role: "admin", permissions: permissions.admin },
           { role: "organiser", permissions: permissions.organiser },
@@ -18,10 +21,15 @@ class RBACService {
           { role: "guest", permissions: permissions.guest },
         ];
         await RBACPerms.insertMany(defaultPerms);
+        console.log("Default permissions inserted");
+        // Fetch the newly inserted permissions
+        perms = await RBACPerms.find();
+        console.log("Fetched newly inserted permissions:", perms.length);
       }
       perms.forEach((perm) => {
         permissions[perm.role] = perm.permissions;
       });
+      console.log("Permissions initialized for roles:", Object.keys(permissions));
 
       // add permissions:read and permissions:update to admin
       permissions.admin.push("permissions:read");
