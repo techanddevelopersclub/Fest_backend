@@ -1,7 +1,7 @@
 // Test endpoint for Vercel deployment
 module.exports = (req, res) => {
   res.status(200).json({
-    message: 'Festify API is working!',
+    message: 'Cieszyc API is working!',
     timestamp: new Date().toISOString(),
     method: req.method,
     url: req.url,

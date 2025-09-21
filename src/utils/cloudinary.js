@@ -13,7 +13,7 @@ cloudinary.config({
  */
 async function uploadImage(filePath) {
   const result = await cloudinary.uploader.upload(filePath, {
-    folder: 'festify/payments',
+    folder: 'cieszyc/payments',
     resource_type: 'image',
   });
   return result.secure_url;

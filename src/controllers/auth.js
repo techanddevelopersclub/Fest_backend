@@ -14,7 +14,7 @@ class AuthController {
         refreshToken,
         user: userPayload,
       } = await AuthService.loginWithEmailPassword(email, password);
-      res.cookie("festifyRefreshToken", refreshToken, {
+      res.cookie("cieszycRefreshToken", refreshToken, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
@@ -34,7 +34,7 @@ class AuthController {
         refreshToken,
         user: userPayload,
       } = await AuthService.register(user);
-      res.cookie("festifyRefreshToken", refreshToken, {
+      res.cookie("cieszycRefreshToken", refreshToken, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
@@ -49,13 +49,13 @@ class AuthController {
   static async refresh(req, res, next) {
     try {
       if (!req.cookies) throw new UnauthorizedError("Missing refresh token");
-      const { festifyRefreshToken } = req.cookies;
+      const { cieszycRefreshToken } = req.cookies;
       const {
         accessToken,
         refreshToken,
         user: userPayload,
-      } = await AuthService.refreshAccessToken(festifyRefreshToken);
-      res.cookie("festifyRefreshToken", refreshToken, {
+      } = await AuthService.refreshAccessToken(cieszycRefreshToken);
+      res.cookie("cieszycRefreshToken", refreshToken, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
@@ -91,7 +91,7 @@ class AuthController {
 
   static async logout(req, res, next) {
     try {
-      res.clearCookie("festifyRefreshToken");
+      res.clearCookie("cieszycRefreshToken");
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
       next(error);

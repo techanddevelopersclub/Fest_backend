@@ -1,7 +1,7 @@
 [
   {
     "name": "Admin",
-    "email": "admin@festify.com",
+    "email": "admin@cieszyc.com",
     "password": "admin123",
     "gender": "male",
     "college": "IIT Dhanbad",
@@ -13,7 +13,7 @@
   },
   {
     "name": "Organiser",
-    "email": "organiser@festify.com",
+    "email": "organiser@cieszyc.com",
     "password": "organiser",
     "gender": "male",
     "college": "IIT Dhanbad",
@@ -25,7 +25,7 @@
   },
   {
     "name": "User",
-    "email": "user@festify.com",
+    "email": "user@cieszyc.com",
     "password": "user@123",
     "gender": "female",
     "college": "IIT Dhanbad",

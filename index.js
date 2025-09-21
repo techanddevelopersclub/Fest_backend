@@ -7,7 +7,7 @@ const app = express();
 
 // home route
 app.get("/", async (req, res) => {
-  res.send(`Festify API - Home<br/>User Agent: ${req.headers["user-agent"]}`);
+  res.send(`Cieszyc API - Home<br/>User Agent: ${req.headers["user-agent"]}`);
 });
 
 // connect to database

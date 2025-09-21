@@ -38,7 +38,7 @@ class Mailer {
     return await Mailer.sendMail({
       from: process.env.MAILING_SERVICE_USER,
       to: email,
-      subject: "Verify your email for Festify",
+      subject: "Verify your email for Cieszyc",
       html: templates.emailVerification({
         verificationUrl,
       }),
@@ -50,13 +50,13 @@ class Mailer {
     return await Mailer.sendMail({
       from: process.env.MAILING_SERVICE_USER,
       to,
-      subject: "Festify Password Reset",
+      subject: "Cieszyc Password Reset",
       html: templates.forgotPassword({
         redirectUrl,
         user,
         company: {
-          name: "Festify",
-          email: "dummy@festify.app",
+          name: "Cieszyc",
+          email: "dummy@cieszyc.app",
           address: {
             street: "Dahiya Street",
             city: "Dhanbad",

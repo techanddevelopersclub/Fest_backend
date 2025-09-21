@@ -109,7 +109,7 @@ describe("AuthController", () => {
           user,
         });
         expect(res.cookie).toHaveBeenCalledWith(
-          "festifyRefreshToken",
+          "cieszycRefreshToken",
           refreshToken,
           {
             httpOnly: true,
@@ -177,7 +177,7 @@ describe("AuthController", () => {
           user,
         });
         expect(res.cookie).toHaveBeenCalledWith(
-          "festifyRefreshToken",
+          "cieszycRefreshToken",
           refreshToken,
           {
             httpOnly: true,
@@ -229,7 +229,7 @@ describe("AuthController", () => {
         });
         const req = {
           cookies: {
-            festifyRefreshToken: refreshToken,
+            cieszycRefreshToken: refreshToken,
           },
         };
         const res = {
@@ -245,7 +245,7 @@ describe("AuthController", () => {
           user,
         });
         expect(res.cookie).toHaveBeenCalledWith(
-          "festifyRefreshToken",
+          "cieszycRefreshToken",
           refreshToken,
           {
             httpOnly: true,
@@ -273,7 +273,7 @@ describe("AuthController", () => {
         expect(res.json).toHaveBeenCalledWith({
           message: "Logged out successfully",
         });
-        expect(res.clearCookie).toHaveBeenCalledWith("festifyRefreshToken");
+        expect(res.clearCookie).toHaveBeenCalledWith("cieszycRefreshToken");
       });
     });
 
@@ -282,7 +282,7 @@ describe("AuthController", () => {
         const refreshToken = "dummyRefreshToken";
         const req = {
           cookies: {
-            festifyRefreshToken: refreshToken,
+            cieszycRefreshToken: refreshToken,
           },
         };
         const res = {
@@ -296,7 +296,7 @@ describe("AuthController", () => {
         expect(res.json).toHaveBeenCalledWith({
           message: "Logged out successfully",
         });
-        expect(res.clearCookie).toHaveBeenCalledWith("festifyRefreshToken");
+        expect(res.clearCookie).toHaveBeenCalledWith("cieszycRefreshToken");
       });
     });
   });

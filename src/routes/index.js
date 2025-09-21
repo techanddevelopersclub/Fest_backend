@@ -3,7 +3,7 @@ const router = express.Router();
 const AuthMiddleware = require("../middlewares/auth");
 
 router.get("/", (req, res) => {
-  res.send("Festify API - API");
+  res.send("Cieszyc API - API");
 });
 
 router.use(AuthMiddleware.extractHeaders);
