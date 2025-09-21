@@ -9,25 +9,28 @@ class RBACPermsRepository {
   }
 
   static async getAllPermissions() {
-    const perms = await RBACPerms.find();
-    const permissionsMap = {};
-    perms.forEach(perm => {
-      permissionsMap[perm.role] = perm.permissions;
-    });
-    return permissionsMap;
+    return permissions;
   }
 
   static async getPermissionsForRole(role) {
     const perms = await RBACPerms.findOne({ role });
-    return perms ? perms.permissions : null;
+    return perms ? perms.permissions : [];
   }
 
   static async updatePermissionsForRole(role, newPermissions) {
     try {
-      const perms = await RBACPerms.findOne({ role });
-      if (!perms) throw new BadRequestError("Role not found");
-
-      perms.permissions = newPermissions;
+      let perms = await RBACPerms.findOne({ role });
+      
+      // If role doesn't exist, create it
+      if (!perms) {
+        perms = new RBACPerms({
+          role: role,
+          permissions: newPermissions
+        });
+      } else {
+        perms.permissions = newPermissions;
+      }
+      
       await perms.save();
     } catch (err) {
       throw err;

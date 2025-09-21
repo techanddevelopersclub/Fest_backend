@@ -13,9 +13,8 @@ router.get(
 );
 router.get(
   "/:name",
-  // Temporarily make public for frontend loading
-  // AuthMiddleware.requireLoggedIn,
-  // RBACMiddleware.requirePermissions("features:read"),
+  AuthMiddleware.requireLoggedIn,
+  RBACMiddleware.requirePermissions("features:read"),
   FeatureFlagController.getByName
 );
 router.post(

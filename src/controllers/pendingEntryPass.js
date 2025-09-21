@@ -4,12 +4,14 @@ const PendingEntryPassRepo = require("../repositories/pendingEntryPass");
 exports.createPendingEntryPass = async (req, res) => {
   try {
     const { event, user, paymentProofUrl } = req.body;
+    
     const pending = await PendingEntryPassRepo.create({
       event,
       user,
       paymentProofUrl,
       paymentStatus: "pending",
     });
+    
     res.status(201).json(pending);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -108,6 +110,28 @@ exports.listPendingEntryPasses = async (req, res) => {
     ]);
 
     res.json({ items, page: Number(page), limit: Number(limit), total });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// List user's own pending entry passes
+exports.listMyPendingEntryPasses = async (req, res) => {
+  try {
+    const { user } = req;
+    const { event } = req.query;
+
+    const query = { 
+      paymentStatus: "pending",
+      user: user._id 
+    };
+    if (event) query.event = event;
+
+    const items = await PendingEntryPassRepo.find(query)
+      .populate("event", "name entryPassPriceInINR")
+      .sort("-createdAt");
+
+    res.json(items);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

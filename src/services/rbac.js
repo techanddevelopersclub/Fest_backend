@@ -7,13 +7,10 @@ const RBACPerms = require("../models/RBACPerms")(applicationDB);
 class RBACService {
   static async initPermissions(callback) {
     try {
-      console.log("Initializing permissions...");
-      let perms = await RBACPerms.find();
-      console.log("Found existing permissions:", perms.length);
+      const perms = await RBACPerms.find();
 
       // If no permissions are found, insert default permissions
       if (!perms || perms.length === 0) {
-        console.log("No permissions found, inserting default permissions...");
         const defaultPerms = [
           { role: "admin", permissions: permissions.admin },
           { role: "organiser", permissions: permissions.organiser },
@@ -21,15 +18,10 @@ class RBACService {
           { role: "guest", permissions: permissions.guest },
         ];
         await RBACPerms.insertMany(defaultPerms);
-        console.log("Default permissions inserted");
-        // Fetch the newly inserted permissions
-        perms = await RBACPerms.find();
-        console.log("Fetched newly inserted permissions:", perms.length);
       }
       perms.forEach((perm) => {
         permissions[perm.role] = perm.permissions;
       });
-      console.log("Permissions initialized for roles:", Object.keys(permissions));
 
       // add permissions:read and permissions:update to admin
       permissions.admin.push("permissions:read");
@@ -50,21 +42,6 @@ class RBACService {
 
   static async updatePermissions(role, permissions) {
     try {
-      console.log("Updating permissions for role:", role);
-      console.log("Permissions to set:", permissions);
-      
-      // Check what roles exist in the database
-      const allRoles = await RBACPerms.find({}, { role: 1 });
-      console.log("All roles in database:", allRoles.map(r => r.role));
-      
-      const perms = await RBACPermsRepository.getPermissionsForRole(role);
-      console.log("Current permissions for role:", perms);
-      
-      if (!perms) {
-        console.log("Role not found in database:", role);
-        throw new BadRequestError("Role not found");
-      }
-
       // cannot remove permissions:read and permissions:update from admin
       if (role === "admin") {
         permissions.push("permissions:read");
@@ -72,13 +49,11 @@ class RBACService {
       }
 
       permissions = [...new Set(permissions)]; // Remove duplicates
-      console.log("Final permissions to save:", permissions);
 
       await RBACPermsRepository.updatePermissionsForRole(role, permissions);
 
       this.initPermissions();
     } catch (err) {
-      console.error("Error updating permissions:", err);
       throw err;
     }
   }

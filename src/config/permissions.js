@@ -84,9 +84,33 @@ const defaultAdminPerms = actions; // Admin has all permissions
 // at the start of the application
 const permissions = {
   admin: defaultAdminPerms,
-  organiser: [],
-  user: [],
-  guest: [],
+  organiser: [
+    "event:read",
+    "event:create",
+    "event:update",
+    "event:updateSelf",
+    "event:delete",
+    "event:deleteSelf",
+    "organisation:read",
+    "organisation:updateSelf",
+    "announcement:read",
+    "announcement:create",
+    "announcement:delete",
+    "announcement:deleteSelf",
+    "notification:send",
+    "entryPass:read",
+    "entryPass:checkIn",
+  ],
+  user: [
+    "event:read",
+    "user:updateSelf",
+    "entryPass:read",
+    "entryPass:purchase",
+    "payment:readSelf",
+  ],
+  guest: [
+    "event:read",
+  ],
   paymentVerifier: [
     "payment:read",
     "payment:verify",

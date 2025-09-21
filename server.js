@@ -27,16 +27,42 @@ FeatureFlagService.initFeatureFlags(() => {
   console.log("Feature flags initialised");
 });
 
-// cors
+// Enhanced CORS configuration for production
 const corsOptions = {
   credentials: true,
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : ["http://localhost:3000"],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "https://fest-frontend-icx7.vercel.app",
+      "https://fest-frontend-icx7-ivxkako6s-cieszycs-projects.vercel.app"
+    ];
+    
+    // Add environment variable origins if they exist
+    if (process.env.ALLOWED_ORIGINS) {
+      allowedOrigins.push(...process.env.ALLOWED_ORIGINS.split(","));
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log("CORS blocked origin:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
+  optionsSuccessStatus: 200
 };
+
 app.use(cors(corsOptions));
 
 // middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // request logger
@@ -56,7 +82,7 @@ app.use("/api", require("./src/routes/index.js"));
 const { handleErrors } = require("./src/utils/errors");
 app.use(handleErrors);
 
-// create server and socket
+// create server and socket (for local development only)
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
@@ -67,7 +93,7 @@ require("./src/sockets")(wss);
 require("./src/workers");
 
 // server port
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 5000;
 
 // listen on port
 server.listen(PORT, () => {

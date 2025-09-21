@@ -10,27 +10,6 @@ app.get("/", async (req, res) => {
   res.send(`Festify API - Home<br/>User Agent: ${req.headers["user-agent"]}`);
 });
 
-// serve manifest.json without authentication
-app.get("/manifest.json", (req, res) => {
-  res.setHeader('Content-Type', 'application/json');
-  res.json({
-    "short_name": "Festify",
-    "name": "Festify: Manage Fests and Events",
-    "description": "Festify is a web app that helps you manage your fests and events. It is a one stop solution for all your fest related problems.",
-    "icons": [
-      {
-        "src": "favicon.ico",
-        "sizes": "64x64 32x32 24x24 16x16",
-        "type": "image/x-icon"
-      }
-    ],
-    "start_url": ".",
-    "display": "standalone",
-    "theme_color": "#000000",
-    "background_color": "#ffffff"
-  });
-});
-
 // connect to database
 require("./database");
 
@@ -46,7 +25,7 @@ FeatureFlagService.initFeatureFlags(() => {
   console.log("Feature flags initialised");
 });
 
-// cors - More permissive for debugging
+// Enhanced CORS configuration for production
 const corsOptions = {
   credentials: true,
   origin: function (origin, callback) {
@@ -73,14 +52,15 @@ const corsOptions = {
     }
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Cookie'],
   optionsSuccessStatus: 200
 };
+
 app.use(cors(corsOptions));
 
 // middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 // request logger

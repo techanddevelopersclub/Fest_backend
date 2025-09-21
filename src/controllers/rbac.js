@@ -14,30 +14,24 @@ class RBACController {
     }
   }
 
-  static async getAllActions(req, res, next) {
+  static async getAllActions(req, res) {
     try {
-      console.log("Getting all actions...");
       const actions = await RBACService.getAllActions();
-      console.log("Actions retrieved:", actions);
       return res.status(200).json({
         actions,
       });
     } catch (err) {
-      console.error("Error getting actions:", err);
       next(err);
     }
   }
 
-  static async getAllPermissions(req, res, next) {
+  static async getAllPermissions(req, res) {
     try {
-      console.log("Getting all permissions...");
       const permissions = await RBACService.getAllPermissions();
-      console.log("Permissions retrieved:", permissions);
       return res.status(200).json({
         permissions,
       });
     } catch (err) {
-      console.error("Error getting permissions:", err);
       next(err);
     }
   }
@@ -45,22 +39,16 @@ class RBACController {
   static async updatePermissions(req, res, next) {
     try {
       const { permissionsMap } = req.body;
-      console.log("Received permissions map:", permissionsMap);
-      
       if (!permissionsMap) {
         throw new BadRequestError("No permissions map in request body");
       }
-      
       for (const { role, permissions } of permissionsMap) {
-        console.log("Processing role:", role, "with permissions:", permissions);
         await RBACService.updatePermissions(role, permissions);
       }
-      
       return res.status(200).json({
         message: "Permissions updated successfully",
       });
     } catch (err) {
-      console.error("Error in updatePermissions controller:", err);
       next(err);
     }
   }

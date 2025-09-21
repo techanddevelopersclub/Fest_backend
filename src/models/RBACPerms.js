@@ -6,7 +6,7 @@ const RBACPermsSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    enum: ["admin", "organiser", "user", "guest"],
+    enum: ["admin", "organiser", "user", "guest", "paymentVerifier"],
   },
   permissions: {
     type: [String],

@@ -6,6 +6,11 @@ const key = "not-so-important-key";
 const JSONQueryMiddleware = (queryKey) => (req, res, next) => {
   const originalJSON = res.json;
   res.json = (data) => {
+    // Check if headers have already been sent
+    if (res.headersSent) {
+      return res;
+    }
+
     // for error responses, return the original data
     if ([500, 400, 401, 403, 404].includes(res.statusCode)) {
       return originalJSON.call(res, data);
