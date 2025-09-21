@@ -78,6 +78,7 @@ class ParticipantService {
 
   static async register(participantData, { promoCode, email }) {
     try {
+      console.log("Received participant data:", participantData);
       this.checkRequiredFields(participantData);
       const event = await EventRepository.getById(participantData.event);
       if (!event) throw new BadRequestError("Invalid event");
@@ -95,6 +96,11 @@ class ParticipantService {
         ]),
       ]; // add leader and remove duplicates
 
+      // Calculate team size
+      participantData.teamSize = participantData.members.length;
+
+      console.log("Processed participant data:", participantData);
+
       await this.#checkValidMembers(participantData.members);
       await this.#checkExistingParticipation(event, participantData);
 
@@ -102,7 +108,7 @@ class ParticipantService {
         participantData.isTeam = true;
       } else {
         participantData.isTeam = false;
-        participantData.teamName = null;
+        // Don't override teamName for solo events - let it keep the participant name
       }
       await this.#checkValidParticipation(event, participantData);
 
@@ -156,15 +162,17 @@ class ParticipantService {
       if (amountToPay === 0) {
         const participant = await ParticipantRepository.create(participantData);
 
-        // create used reward for the promotion
-        const reward = {
-          user: participant.leader,
-          type: "PromotionCampaign",
-          reference: promotion._id,
-          status: "used",
-          usedBy: participant.leader,
-        };
-        await RewardService.create(reward);
+        // create used reward for the promotion only if there was a promotion
+        if (promotion) {
+          const reward = {
+            user: participant.leader,
+            type: "PromotionCampaign",
+            reference: promotion._id,
+            status: "used",
+            usedBy: participant.leader,
+          };
+          await RewardService.create(reward);
+        }
 
         return {
           participant,
@@ -179,7 +187,7 @@ class ParticipantService {
           type: "Participant",
           user: participantData.leader,
           participant: JSON.stringify(participantData),
-          appliedPromotionId: promotion._id,
+          appliedPromotionId: promotion?._id || null,
         },
       });
       return {

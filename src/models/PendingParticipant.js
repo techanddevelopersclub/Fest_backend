@@ -28,6 +28,17 @@ const PendingParticipantSchema = new mongoose.Schema(
         required: false,
       },
     ],
+    teamMemberNames: [
+      {
+        type: String,
+        required: false,
+      },
+    ],
+    teamSize: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
     paymentProofUrl: {
       type: String,
       required: true,

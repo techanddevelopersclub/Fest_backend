@@ -15,6 +15,8 @@ exports.createPendingParticipant = async (req, res) => {
       isTeam,
       teamName,
       members,
+      teamMemberNames,
+      teamSize,
       paymentProofUrl,
     } = req.body;
     const pending = await PendingParticipantRepo.create({
@@ -23,6 +25,8 @@ exports.createPendingParticipant = async (req, res) => {
       isTeam,
       teamName,
       members,
+      teamMemberNames,
+      teamSize,
       paymentProofUrl,
       paymentStatus: "pending",
     });
@@ -46,6 +50,8 @@ exports.verifyPendingParticipant = async (req, res) => {
       isTeam: pending.isTeam,
       teamName: pending.teamName,
       members: pending.members,
+      teamMemberNames: pending.teamMemberNames,
+      teamSize: pending.teamSize,
     });
     // Remove from pending and mark audit on pending before deletion
     pending.paymentStatus = "verified";
@@ -93,6 +99,8 @@ exports.rejectPendingParticipant = async (req, res) => {
       isTeam: pending.isTeam,
       teamName: pending.teamName,
       members: pending.members,
+      teamMemberNames: pending.teamMemberNames,
+      teamSize: pending.teamSize,
       paymentProofUrl: pending.paymentProofUrl,
       rejectionReason: reason || "",
       rejectedAt: new Date(),
