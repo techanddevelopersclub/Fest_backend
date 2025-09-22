@@ -59,6 +59,26 @@ class ParticipantController {
       next(error);
     }
   }
+
+  static async updateAttendance(req, res, next) {
+    try {
+      const { participantId } = req.params;
+      const { attendance } = req.body;
+      const { user } = req;
+      
+      const updatedParticipant = await ParticipantService.updateAttendance(
+        participantId,
+        attendance,
+        user._id
+      );
+      
+      res.status(200).json({
+        participant: updatedParticipant,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = ParticipantController;

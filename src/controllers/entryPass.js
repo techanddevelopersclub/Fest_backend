@@ -58,6 +58,18 @@ class EntryPassController {
       next(err);
     }
   }
+
+  static async getAllByEvent(req, res, next) {
+    try {
+      const { eventId } = req.params;
+      const entryPasses = await EntryPassService.getByEvent(eventId);
+      return res.status(200).json({
+        entryPasses,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = EntryPassController;

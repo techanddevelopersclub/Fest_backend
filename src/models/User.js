@@ -31,9 +31,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "College is required"],
   },
-  zipCode: {
+  branchName: {
     type: String,
-    required: [true, "Zip code is required"],
+    required: [true, "Branch name is required"],
   },
   degree: {
     type: String,

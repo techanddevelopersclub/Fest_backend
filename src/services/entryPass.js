@@ -157,6 +157,18 @@ class EntryPassService {
     }
   }
 
+  static async getByEvent(eventId) {
+    try {
+      if (!eventId) {
+        throw new BadRequestError("Event ID is required");
+      }
+      const entryPasses = await EntryPassRepository.getByEvent(eventId);
+      return entryPasses;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async updateById(id, entryPass) {
     try {
       if (!id) {

@@ -96,8 +96,15 @@ class ParticipantService {
         ]),
       ]; // add leader and remove duplicates
 
-      // Calculate team size
-      participantData.teamSize = participantData.members.length;
+      // Calculate team size - use frontend value if provided, otherwise calculate from members
+      if (participantData.teamSize && participantData.teamSize > 0) {
+        // Use the team size from frontend (based on team member names)
+        console.log("Using frontend team size:", participantData.teamSize);
+      } else {
+        // Fallback to calculating from members array
+        participantData.teamSize = participantData.members.length;
+        console.log("Calculated team size from members:", participantData.teamSize);
+      }
 
       console.log("Processed participant data:", participantData);
 
@@ -227,6 +234,29 @@ class ParticipantService {
         eventId
       );
       return participations;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async updateAttendance(participantId, attendance, markedBy) {
+    try {
+      if (!participantId) throw new BadRequestError("Missing participantId");
+      if (!attendance) throw new BadRequestError("Missing attendance status");
+      if (!["present", "absent", "pending"].includes(attendance)) {
+        throw new BadRequestError("Invalid attendance status");
+      }
+
+      const updatedParticipant = await ParticipantRepository.updateById(
+        participantId,
+        {
+          attendance,
+          attendanceMarkedAt: new Date(),
+          attendanceMarkedBy: markedBy,
+        }
+      );
+
+      return updatedParticipant;
     } catch (err) {
       throw err;
     }

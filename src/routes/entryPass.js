@@ -32,5 +32,12 @@ router.post(
   RBACMiddleware.requirePermissions("entryPass:checkIn"),
   EntryPassController.checkIn
 );
+router.get(
+  "/event/:eventId",
+  AuthMiddleware.requireLoggedIn,
+  AuthMiddleware.requireVerified,
+  RBACMiddleware.requirePermissions("entryPass:read"),
+  EntryPassController.getAllByEvent
+);
 
 module.exports = router;

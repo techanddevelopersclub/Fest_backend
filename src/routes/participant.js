@@ -21,5 +21,11 @@ router.get(
   AuthMiddleware.requireVerified,
   ParticipantController.getAllByEventId
 );
+router.patch(
+  "/:participantId/attendance",
+  AuthMiddleware.requireLoggedIn,
+  AuthMiddleware.requireVerified,
+  ParticipantController.updateAttendance
+);
 
 module.exports = router;

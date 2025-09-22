@@ -21,7 +21,7 @@ class AuthService {
       "password",
       "gender",
       "college",
-      "zipCode",
+      "branchName",
       "degree",
       "yearOfGraduation",
     ];

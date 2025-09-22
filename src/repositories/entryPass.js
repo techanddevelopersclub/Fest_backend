@@ -44,6 +44,17 @@ class EntryPassRepository {
       throw err;
     }
   }
+
+  static async getByEvent(event) {
+    try {
+      return await EntryPass.find({ event })
+        .populate("user", "name email college branchName degree yearOfGraduation")
+        .populate("event", "name")
+        .sort("-createdAt");
+    } catch (err) {
+      throw err;
+    }
+  }
 }
 
 module.exports = EntryPassRepository;

@@ -56,6 +56,21 @@ const PendingParticipantSchema = new mongoose.Schema(
     verifiedAt: { type: Date },
     rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     rejectedAt: { type: Date },
+    attendance: {
+      type: String,
+      enum: ["present", "absent", "pending"],
+      default: "pending",
+      required: true,
+    },
+    attendanceMarkedAt: {
+      type: Date,
+      required: false,
+    },
+    attendanceMarkedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false,
+    },
   },
   {
     timestamps: true,
