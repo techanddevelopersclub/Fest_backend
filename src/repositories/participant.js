@@ -11,6 +11,22 @@ class ParticipantRepository {
     }
   }
 
+  static async getById(id) {
+    try {
+      return await Participant.findById(id).populate("event").populate("members").populate("leader");
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  static async updateById(id, update) {
+    try {
+      return await Participant.findByIdAndUpdate(id, update, { new: true });
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async getAllByEventAndMembers(eventId, members) {
     try {
       return await Participant.find({

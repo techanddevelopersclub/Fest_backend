@@ -76,6 +76,9 @@ const actions = [
 
   // Rewards
   "reward:read",
+  
+  // Participants
+  "participant:attendance",
 ];
 
 const defaultAdminPerms = actions; // Admin has all permissions
@@ -100,6 +103,8 @@ const permissions = {
     "notification:send",
     "entryPass:read",
     "entryPass:checkIn",
+    // Allow organisers to mark attendance
+    "participant:attendance",
   ],
   user: [
     "event:read",
