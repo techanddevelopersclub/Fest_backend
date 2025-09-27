@@ -25,5 +25,6 @@ router.use("/promotions", require("./promotionCampaign"));
 router.use("/rewards", require("./rewards"));
 router.use("/pending-participants", require("./pendingParticipant"));
 router.use("/pending-entry-passes", require("./pendingEntryPass"));
+router.use("/payment-logs", require("./paymentLog"));
 
 module.exports = router;

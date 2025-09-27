@@ -1,9 +1,10 @@
 const PendingEntryPassRepo = require("../repositories/pendingEntryPass");
+const PaymentLogService = require("../services/paymentLog");
 
 // Create a new pending entry pass
 exports.createPendingEntryPass = async (req, res) => {
   try {
-    const { event, user, paymentProofUrl } = req.body;
+    const { event, user, paymentProofUrl, amount } = req.body;
     
     const pending = await PendingEntryPassRepo.create({
       event,
@@ -11,6 +12,28 @@ exports.createPendingEntryPass = async (req, res) => {
       paymentProofUrl,
       paymentStatus: "pending",
     });
+
+    // Log payment submission
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "entryPass",
+          amount: amount || 0,
+          paymentProofUrl: paymentProofUrl || ""
+        },
+        "submitted",
+        null,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment submission:", logError);
+      // Don't fail the main operation if logging fails
+    }
     
     res.status(201).json(pending);
   } catch (err) {
@@ -32,6 +55,27 @@ exports.verifyPendingEntryPass = async (req, res) => {
     if (pending.paymentStatus !== "pending") {
       return res.status(400).json({ error: "Entry pass is not pending" });
     }
+
+    // Log payment verification before processing
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "entryPass"
+        },
+        "verified",
+        req.user?._id,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment verification:", logError);
+      // Continue with verification even if logging fails
+    }
+
     // Create EntryPass
     const entryPass = await EntryPassRepo.create(pending.user, pending.event);
     // Update pending entry pass status and remove
@@ -71,6 +115,28 @@ exports.rejectPendingEntryPass = async (req, res) => {
     }
     const pending = await PendingEntryPassRepo.findById(id);
     if (!pending) return res.status(404).json({ error: "Not found" });
+
+    // Log payment rejection before processing
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "entryPass"
+        },
+        "rejected",
+        req.user?._id,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID,
+          rejectionReason: reason
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment rejection:", logError);
+      // Continue with rejection even if logging fails
+    }
+
     pending.paymentStatus = "rejected";
     pending.rejectionReason = reason || "";
     pending.rejectedBy = req.user?._id || null;

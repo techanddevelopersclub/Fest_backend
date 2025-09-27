@@ -5,6 +5,7 @@ const RejectedParticipantRepo = require("../repositories/rejectedParticipant");
 const FeatureFlagService = require("../services/featureFlag");
 const Mailer = require("../services/mailer");
 const UserRepo = require("../repositories/user");
+const PaymentLogService = require("../services/paymentLog");
 
 // Create a new pending participant
 exports.createPendingParticipant = async (req, res) => {
@@ -18,6 +19,7 @@ exports.createPendingParticipant = async (req, res) => {
       teamMemberNames,
       teamSize,
       paymentProofUrl,
+      amount,
     } = req.body;
     const pending = await PendingParticipantRepo.create({
       event,
@@ -30,6 +32,29 @@ exports.createPendingParticipant = async (req, res) => {
       paymentProofUrl,
       paymentStatus: "pending",
     });
+
+    // Log payment submission
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "participant",
+          amount: amount || 0,
+          paymentProofUrl: paymentProofUrl || ""
+        },
+        "submitted",
+        null,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment submission:", logError);
+      // Don't fail the main operation if logging fails
+    }
+
     res.status(201).json(pending);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -42,6 +67,27 @@ exports.verifyPendingParticipant = async (req, res) => {
     const { id } = req.params;
     const pending = await PendingParticipantRepo.findById(id);
     if (!pending) return res.status(404).json({ error: "Not found" });
+    
+    // Log payment verification before processing
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "participant"
+        },
+        "verified",
+        req.user?._id,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment verification:", logError);
+      // Continue with verification even if logging fails
+    }
+
     // Move to Participant table using main application DB connection
     const ParticipantModel = Participant(applicationDB);
     const participant = await ParticipantModel.create({
@@ -92,6 +138,28 @@ exports.rejectPendingParticipant = async (req, res) => {
     }
     const pending = await PendingParticipantRepo.findById(id);
     if (!pending) return res.status(404).json({ error: "Not found" });
+
+    // Log payment rejection before processing
+    try {
+      await PaymentLogService.createPaymentLogFromPending(
+        {
+          ...pending.toObject(),
+          paymentType: "participant"
+        },
+        "rejected",
+        req.user?._id,
+        {
+          ipAddress: req.ip,
+          userAgent: req.get('User-Agent'),
+          sessionId: req.sessionID,
+          rejectionReason: reason
+        }
+      );
+    } catch (logError) {
+      console.error("Failed to log payment rejection:", logError);
+      // Continue with rejection even if logging fails
+    }
+
     // Move to RejectedParticipant table
     const rejected = await RejectedParticipantRepo.create({
       event: pending.event,
