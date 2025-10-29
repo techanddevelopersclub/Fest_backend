@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Registration Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .event-banner {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            background-color: #28a745;
+            color: white !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .important-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Event Registration Confirmed!</h1>
+        </div>
+        
+        {{#if event.bannerUrl}}
+        <img src="{{event.bannerUrl}}" alt="Event Banner" class="event-banner">
+        {{/if}}
+        
+        <div class="content">
+            <p>Hello {{participant.name}},</p>
+            
+            <p>Your registration for <strong>{{event.name}}</strong> has been confirmed. Here are your event details:</p>
+            
+            <div class="info-box">
+                <h3>Event Details:</h3>
+                <ul>
+                    <li><strong>Event:</strong> {{event.name}}</li>
+                    <li><strong>Date:</strong> {{event.date}}</li>
+                    <li><strong>Time:</strong> {{event.time}}</li>
+                    <li><strong>Venue:</strong> {{event.venue}}</li>
+                    {{#if event.teamSize}}
+                    <li><strong>Team Size:</strong> {{event.teamSize}}</li>
+                    {{/if}}
+                </ul>
+            </div>
+
+            {{#if ticketQrCode}}
+            <div class="qr-code">
+                <h3>Your Entry Pass</h3>
+                <img src="{{ticketQrCode}}" alt="Entry QR Code">
+                <p>Ticket ID: {{ticketId}}</p>
+            </div>
+            {{/if}}
+
+            <div class="important-note">
+                <h4>Important Notes:</h4>
+                <ul>
+                    <li>Please arrive at least 30 minutes before the event start time</li>
+                    <li>Bring a valid photo ID for verification</li>
+                    <li>Keep this email handy for quick reference</li>
+                    {{#each event.additionalInstructions}}
+                    <li>{{this}}</li>
+                    {{/each}}
+                </ul>
+            </div>
+
+            <center>
+                <a href="{{eventDetailsUrl}}" class="button">View Event Details</a>
+            </center>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated message, please do not reply.</p>
+            <p>Having trouble? Contact event organizers:</p>
+            <p>Email: {{event.organizerEmail}}</p>
+            {{#if event.organizerPhone}}
+            <p>Phone: {{event.organizerPhone}}</p>
+            {{/if}}
+            <p>&copy; {{currentYear}} {{festName}}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

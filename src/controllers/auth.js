@@ -114,11 +114,20 @@ class AuthController {
   static async sendVerificationEmail(req, res, next) {
     try {
       const { user } = req;
-      if (user.isVerified) {
-        throw new BadRequestError("User is already verified");
-      }
       await AuthService.trySendVerificationEmail(user._id);
-      res.status(200).json({ message: "Verification email sent" });
+      
+      // Get rate limit info from headers
+      const remaining = res.getHeader('X-RateLimit-Remaining');
+      const resetTime = res.getHeader('X-RateLimit-Reset');
+      
+      res.status(200).json({ 
+        message: "Verification email sent",
+        details: {
+          remainingAttempts: remaining,
+          nextAllowedAttempt: new Date(parseInt(resetTime)).toISOString(),
+          cooldownMinutes: Math.ceil((parseInt(resetTime) - Date.now()) / (1000 * 60))
+        }
+      });
     } catch (error) {
       next(error);
     }

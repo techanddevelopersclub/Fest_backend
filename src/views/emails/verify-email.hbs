@@ -1,31 +1,100 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Verify Email</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - Fest Management</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            font-size: 14px;
             line-height: 1.6;
-            color: #666;
-            background-color: #f4f4f4;
-            padding: 5px;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
         }
-
-        a {
-            color: #999;
-            padding: 15px;
-            font-size: 14px;
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header img {
+            max-width: 150px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            background-color: #007bff;
+            color: white !important;
+            padding: 12px 25px;
             text-decoration: none;
-            font-weight: bold;
-            display: inline-block;
             border-radius: 5px;
-            border: 1px solid #999;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin: 20px 0;
         }
     </style>
-  </head>
-  <body>
-    <div>
-      <a href="{{verificationUrl}}">Verify Email</a>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Verify Your Email</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hello {{user.name}},</p>
+            
+            <p>Welcome to our Fest Management Platform! To complete your registration and access all features, please verify your email address.</p>
+            
+            <div class="info-box">
+                <p><strong>Account Details:</strong></p>
+                <ul>
+                    <li>Name: {{user.name}}</li>
+                    <li>Email: {{user.email}}</li>
+                    <li>College: {{user.college}}</li>
+                </ul>
+            </div>
+
+            <center>
+                <a href="{{verificationUrl}}" class="button">Verify Email Address</a>
+            </center>
+
+            <p>This verification link will expire in 24 hours. If you didn't create this account, please ignore this email.</p>
+            
+            <p>Having trouble? Copy and paste this link into your browser:</p>
+            <p style="word-break: break-all; font-size: 12px; color: #666;">
+                {{verificationUrl}}
+            </p>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated message, please do not reply.</p>
+            <p>&copy; {{currentYear}} Fest Management. All rights reserved.</p>
+            <p>
+                Need help? Contact our support team.
+            </p>
+        </div>
     </div>
-  </body>
+</body>
 </html>

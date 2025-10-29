@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const templates = require("./../views/emails");
+const { DateTime } = require("luxon");
 
 const transporter = nodemailer.createTransport({
   host: process.env.MAILING_SERVICE_HOST,
@@ -33,14 +34,40 @@ class Mailer {
     });
   }
 
-  static async sendVerificationEmail({ email, verificationToken }) {
+  static async sendVerificationEmail({ email, verificationToken, user }) {
     const verificationUrl = `${process.env.CLIENT_EMAIL_VERIFICATION_URL}?token=${verificationToken}`;
     return await Mailer.sendMail({
       from: process.env.MAILING_SERVICE_USER,
       to: email,
-      subject: "Verify your email for Cieszyc",
+      subject: "Verify your email for Fest Management",
       html: templates.emailVerification({
         verificationUrl,
+        user,
+        currentYear: new Date().getFullYear()
+      }),
+    });
+  }
+
+  static async sendEventRegistrationEmail({ participant, event, ticketId, ticketQrCode }) {
+    const eventDate = DateTime.fromISO(event.startDate);
+    const eventDetailsUrl = `${process.env.CLIENT_URL}/events/${event._id}`;
+
+    return await Mailer.sendMail({
+      from: process.env.MAILING_SERVICE_USER,
+      to: participant.email,
+      subject: `Registration Confirmed: ${event.name}`,
+      html: templates.eventRegistration({
+        participant,
+        event: {
+          ...event,
+          date: eventDate.toLocaleString(DateTime.DATE_FULL),
+          time: eventDate.toLocaleString(DateTime.TIME_SIMPLE),
+        },
+        ticketId,
+        ticketQrCode,
+        eventDetailsUrl,
+        currentYear: new Date().getFullYear(),
+        festName: process.env.FEST_NAME || 'Fest Management'
       }),
     });
   }
