@@ -163,6 +163,7 @@ class AuthService {
       await MailerService.sendVerificationEmail({
         email: user.email,
         verificationToken,
+        user: UserRepository.excludeSensitiveFields(user),
       });
     } catch (err) {
       throw err;
