@@ -6,6 +6,7 @@ const FeatureFlagService = require("../services/featureFlag");
 const Mailer = require("../services/mailer");
 const UserRepo = require("../repositories/user");
 const PaymentLogService = require("../services/paymentLog");
+const EventRepo = require("../repositories/event");
 
 // Create a new pending participant
 exports.createPendingParticipant = async (req, res) => {
@@ -111,16 +112,20 @@ exports.verifyPendingParticipant = async (req, res) => {
       const flag = await FeatureFlagService.getByName("PAYMENT_VERIFICATION_EMAILS");
       if (flag?.enabled) {
         const user = await UserRepo.getById(pending.leader);
-        if (user?.email) {
-          await Mailer.sendMail({
-            from: process.env.MAILING_SERVICE_USER,
-            to: user.email,
-            subject: "Your event registration payment is verified",
-            html: `<p>Your payment for event ${String(pending.event)} has been verified.</p>`,
+        const event = await EventRepo.getById(pending.event);
+        
+        if (user?.email && event && participant) {
+          await Mailer.sendParticipantVerificationEmail({
+            user,
+            event,
+            participant,
           });
         }
       }
-    } catch (_) {}
+    } catch (emailError) {
+      console.error("Failed to send participant verification email:", emailError);
+      // Don't fail the verification if email fails
+    }
 
     res.json(participant);
   } catch (err) {

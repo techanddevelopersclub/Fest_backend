@@ -45,6 +45,7 @@ const EntryPassRepo = require("../repositories/entryPass");
 const FeatureFlagService = require("../services/featureFlag");
 const Mailer = require("../services/mailer");
 const UserRepo = require("../repositories/user");
+const EventRepo = require("../repositories/event");
 
 // Verify a pending entry pass (move to EntryPass table)
 exports.verifyPendingEntryPass = async (req, res) => {
@@ -79,26 +80,32 @@ exports.verifyPendingEntryPass = async (req, res) => {
     // Create EntryPass
     const entryPass = await EntryPassRepo.create(pending.user, pending.event);
     // Update pending entry pass status and remove
-  pending.paymentStatus = "verified";
-  pending.verifiedBy = req.user?._id || null;
-  pending.verifiedAt = new Date();
+    pending.paymentStatus = "verified";
+    pending.verifiedBy = req.user?._id || null;
+    pending.verifiedAt = new Date();
     await pending.save();
     await PendingEntryPassRepo.findByIdAndDelete(id);
-  // Optionally send email
-  try {
-    const flag = await FeatureFlagService.getByName("PAYMENT_VERIFICATION_EMAILS");
-    if (flag?.enabled) {
-      const user = await UserRepo.getById(pending.user);
-      if (user?.email) {
-        await Mailer.sendMail({
-          from: process.env.MAILING_SERVICE_USER,
-          to: user.email,
-          subject: "Your entry pass payment is verified",
-          html: `<p>Your payment for entry pass has been verified for event ${String(pending.event)}</p>`,
-        });
+    
+    // Optionally send email
+    try {
+      const flag = await FeatureFlagService.getByName("PAYMENT_VERIFICATION_EMAILS");
+      if (flag?.enabled) {
+        // Fetch user and event data with proper population
+        const user = await UserRepo.getById(pending.user);
+        const event = await EventRepo.getById(pending.event);
+        
+        if (user?.email && event && entryPass) {
+          await Mailer.sendEntryPassVerificationEmail({
+            user,
+            event,
+            entryPassId: entryPass._id,
+          });
+        }
       }
+    } catch (emailError) {
+      console.error("Failed to send entry pass verification email:", emailError);
+      // Don't fail the verification if email fails
     }
-  } catch (_) {}
   res.status(201).json({ entryPass });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -142,6 +149,28 @@ exports.rejectPendingEntryPass = async (req, res) => {
     pending.rejectedBy = req.user?._id || null;
     pending.rejectedAt = new Date();
     await pending.save();
+    
+    // Optionally send email
+    try {
+      const flag = await FeatureFlagService.getByName("PAYMENT_VERIFICATION_EMAILS");
+      if (flag?.enabled) {
+        // Fetch user and event data with proper population
+        const user = await UserRepo.getById(pending.user);
+        const event = await EventRepo.getById(pending.event);
+        
+        if (user?.email && event) {
+          await Mailer.sendEntryPassRejectionEmail({
+            user,
+            event,
+            rejectionReason: reason,
+          });
+        }
+      }
+    } catch (emailError) {
+      console.error("Failed to send entry pass rejection email:", emailError);
+      // Don't fail the rejection if email fails
+    }
+    
     res.json(pending);
   } catch (err) {
     res.status(500).json({ error: err.message });

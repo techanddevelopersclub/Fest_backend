@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entry Pass Payment Verified</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #28a745;
+            margin: 0;
+        }
+        .event-banner {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            background-color: #28a745;
+            color: white !important;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .qr-code {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .qr-code img {
+            max-width: 250px;
+            height: auto;
+            border: 3px solid #28a745;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: white;
+        }
+        .qr-code h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        .important-note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success-message {
+            background-color: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 20px 0;
+            color: #155724;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✓ Payment Verified!</h1>
+        </div>
+        
+        {{#if event.image}}
+        <img src="{{event.image}}" alt="Event Banner" class="event-banner">
+        {{/if}}
+        
+        <div class="content">
+            <p>Hello <strong>{{user.name}}</strong>,</p>
+            
+            <div class="success-message">
+                <p style="margin: 0;"><strong>Great news!</strong> Your payment for the entry pass has been verified successfully.</p>
+            </div>
+            
+            <p>Your entry pass for <strong>{{event.name}}</strong> is now active. Here are your event details:</p>
+            
+            <div class="info-box">
+                <h3 style="margin-top: 0;">Event Details:</h3>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li><strong>Event Name:</strong> {{event.name}}</li>
+                    <li><strong>Date:</strong> {{eventDate}}</li>
+                    <li><strong>Time:</strong> {{eventTime}}</li>
+                    <li><strong>Venue:</strong> {{event.venue}}</li>
+                    {{#if event.entryPassPriceInINR}}
+                    <li><strong>Price:</strong> ₹{{event.entryPassPriceInINR}}</li>
+                    {{/if}}
+                </ul>
+            </div>
+
+            {{#if qrCodeUrl}}
+            <div class="qr-code">
+                <h3>Your Entry Pass QR Code</h3>
+                <img src="{{qrCodeUrl}}" alt="Entry Pass QR Code">
+                <p><strong>Entry Pass ID:</strong> {{entryPassId}}</p>
+                <p style="font-size: 12px; color: #666;">Please present this QR code at the event venue for entry.</p>
+            </div>
+            {{/if}}
+
+            <div class="important-note">
+                <h4 style="margin-top: 0;">Important Notes:</h4>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Please arrive at least 30 minutes before the event start time</li>
+                    <li>Bring a valid photo ID for verification along with this QR code</li>
+                    <li>Keep this email handy for quick reference</li>
+                    <li>Screenshot or print this QR code for easy access at the venue</li>
+                </ul>
+            </div>
+
+            <center>
+                <a href="{{eventDetailsUrl}}" class="button">View Event Details</a>
+            </center>
+        </div>
+
+        <div class="footer">
+            <p>This is an automated message, please do not reply.</p>
+            <p>Having trouble? Contact event organizers for assistance.</p>
+            <p>&copy; {{currentYear}} {{festName}}. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
+
