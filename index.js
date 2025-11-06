@@ -33,8 +33,7 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     
     const allowedOrigins = [
-      "http://localhost:3000",
-      "http://localhost:5173",
+      "https://events.cieszyc.site",
       "https://fest-frontend-icx7.vercel.app",
       "https://fest-frontend-icx7-ivxkako6s-cieszycs-projects.vercel.app"
     ];
