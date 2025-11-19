@@ -12,7 +12,6 @@ class UserService {
       "password",
       "gender",
       "college",
-      "zipCode",
       "degree",
       "yearOfGraduation",
       "image",
