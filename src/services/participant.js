@@ -108,8 +108,42 @@ class ParticipantService {
 
       console.log("Processed participant data:", participantData);
 
-      await this.#checkValidMembers(participantData.members);
-      await this.#checkExistingParticipation(event, participantData);
+      // If member user IDs are provided (more than just the leader), validate them
+      const providedMemberIds = Array.isArray(participantData.members)
+        ? participantData.members.filter(Boolean).filter((id) => id !== participantData.leader)
+        : [];
+
+      if (providedMemberIds.length > 0) {
+        // Validate user IDs and ensure they're not already participating in the event
+        participantData.members = [participantData.leader, ...new Set(providedMemberIds)];
+        await this.#checkValidMembers(participantData.members);
+        await this.#checkExistingParticipation(event, participantData);
+      } else if (Array.isArray(participantData.teamMemberNames) && participantData.teamMemberNames.length > 0) {
+        // When member IDs are not available but team member NAMES are given (unregistered members),
+        // validate team size constraints and skip user-id based validations
+        const totalSize = 1 + participantData.teamMemberNames.length; // leader + member names
+        if (event.minTeamSize > 1) {
+          if (totalSize < event.minTeamSize) {
+            throw new BadRequestError(`Team must have at least ${event.minTeamSize} members`);
+          }
+          if (totalSize > event.maxTeamSize) {
+            throw new BadRequestError(`Team can have at most ${event.maxTeamSize} members`);
+          }
+        } else {
+          // Solo event; do not allow named members
+          if (participantData.teamMemberNames.length > 0) {
+            throw new BadRequestError(`Solo event can have at most 1 member`);
+          }
+        }
+        // Ensure teamSize aligns with provided names
+        participantData.members = [participantData.leader];
+        participantData.teamSize = totalSize;
+      } else {
+        // No additional members were given; default members array contains only the leader
+        participantData.members = [participantData.leader];
+        // still perform existing participation check for leader
+        await this.#checkExistingParticipation(event, participantData);
+      }
 
       if (event.minTeamSize > 1) {
         participantData.isTeam = true;

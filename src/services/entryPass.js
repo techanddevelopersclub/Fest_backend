@@ -51,6 +51,24 @@ class EntryPassService {
 
   static async purchase({ user, eventId }, promoCode) {
     try {
+      // Normalize / validate user: Entry passes are single-user only.
+      // If frontend accidentally sends comma-separated IDs or an array, reject explicitly.
+      if (Array.isArray(user)) {
+        throw new BadRequestError(
+          "Entry pass purchase supports a single user. Please purchase separately."
+        );
+      }
+      if (typeof user === "string" && user.includes(",")) {
+        const users = user
+          .split(",")
+          .map((u) => (u || "").trim())
+          .filter(Boolean);
+        if (users.length > 1) {
+          throw new BadRequestError(
+            "Entry pass purchase supports a single user. Please purchase separately."
+          );
+        }
+      }
       const event = await EventRepository.getById(eventId);
       if (!event) {
         throw new Error("Event not found");
