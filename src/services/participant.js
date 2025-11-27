@@ -50,12 +50,14 @@ class ParticipantService {
       if (!participant.teamName) {
         throw new BadRequestError("Team name is required");
       }
-      if (event.minTeamSize > participant.members.length) {
+      // Use participant.teamSize when available (frontend may have provided team size) else fallback to members length
+      const teamSizeToCheck = participant.teamSize && participant.teamSize > 0 ? participant.teamSize : participant.members.length;
+      if (event.minTeamSize > teamSizeToCheck) {
         throw new BadRequestError(
           `Team must have at least ${event.minTeamSize} members`
         );
       }
-      if (event.maxTeamSize < participant.members.length) {
+      if (event.maxTeamSize < teamSizeToCheck) {
         throw new BadRequestError(
           `Team can have at most ${event.maxTeamSize} members`
         );
@@ -121,7 +123,20 @@ class ParticipantService {
       } else if (Array.isArray(participantData.teamMemberNames) && participantData.teamMemberNames.length > 0) {
         // When member IDs are not available but team member NAMES are given (unregistered members),
         // validate team size constraints and skip user-id based validations
-        const totalSize = 1 + participantData.teamMemberNames.length; // leader + member names
+        // teamMemberNames may already include the leader's name (frontend does this), so we compute total
+        // size robustly: if leader's name is in teamMemberNames (and available) use that length, else
+        // add 1 for the leader.
+        let totalSize;
+        try {
+          const leaderUser = await UserRepository.getById(participantData.leader);
+          const leaderName = leaderUser?.name ? leaderUser.name.trim().toLowerCase() : null;
+          const normalizedNames = participantData.teamMemberNames.map((n) => (n || "").trim().toLowerCase());
+          const includesLeader = leaderName && normalizedNames.includes(leaderName);
+          totalSize = includesLeader ? participantData.teamMemberNames.length : 1 + participantData.teamMemberNames.length;
+        } catch (err) {
+          // If leader fetch fails, assume frontend included leader name (safe default), use length as provided
+          totalSize = participantData.teamMemberNames.length;
+        }
         if (event.minTeamSize > 1) {
           if (totalSize < event.minTeamSize) {
             throw new BadRequestError(`Team must have at least ${event.minTeamSize} members`);
@@ -135,9 +150,13 @@ class ParticipantService {
             throw new BadRequestError(`Solo event can have at most 1 member`);
           }
         }
-        // Ensure teamSize aligns with provided names
+        // Ensure teamSize aligns with provided names. Keep leader-only members array and set teamSize.
         participantData.members = [participantData.leader];
-        participantData.teamSize = totalSize;
+        participantData.teamSize = participantData.teamSize && participantData.teamSize > 0
+          ? participantData.teamSize
+          : totalSize;
+        // Check leader is not already participating (cannot check unregistered member names)
+        await this.#checkExistingParticipation(event, participantData);
       } else {
         // No additional members were given; default members array contains only the leader
         participantData.members = [participantData.leader];
