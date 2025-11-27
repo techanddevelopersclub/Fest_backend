@@ -22,14 +22,30 @@ exports.createPendingParticipant = async (req, res) => {
       paymentProofUrl,
       amount,
     } = req.body;
+
+    // Normalize and dedupe teamMemberNames if provided
+    let normalizedTeamMemberNames = undefined;
+    let computedTeamSize = teamSize;
+    if (Array.isArray(teamMemberNames) && teamMemberNames.length > 0) {
+      normalizedTeamMemberNames = [...new Set(teamMemberNames.map(n => (n || "").trim()).filter(Boolean))];
+      try {
+        const leaderUser = await UserRepo.getById(leader);
+        // user repo returns user object; we use leaderUser.name to check inclusion
+        const leaderName = leaderUser?.name ? leaderUser.name.trim().toLowerCase() : null;
+        const includesLeader = leaderName && normalizedTeamMemberNames.map(n => n.toLowerCase()).includes(leaderName);
+        computedTeamSize = includesLeader ? normalizedTeamMemberNames.length : 1 + normalizedTeamMemberNames.length;
+      } catch (err) {
+        computedTeamSize = normalizedTeamMemberNames.length;
+      }
+    }
     const pending = await PendingParticipantRepo.create({
       event,
       leader,
       isTeam,
       teamName,
       members,
-      teamMemberNames,
-      teamSize,
+      teamMemberNames: normalizedTeamMemberNames || teamMemberNames,
+      teamSize: computedTeamSize || teamSize,
       paymentProofUrl,
       paymentStatus: "pending",
     });

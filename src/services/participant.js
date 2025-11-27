@@ -127,16 +127,23 @@ class ParticipantService {
         // size robustly: if leader's name is in teamMemberNames (and available) use that length, else
         // add 1 for the leader.
         let totalSize;
+        // Normalize and dedupe names
+        const normalizedNames = participantData.teamMemberNames
+          .map((n) => (n || "").trim())
+          .filter(Boolean);
+        const uniqueNames = [...new Set(normalizedNames)];
+
         try {
           const leaderUser = await UserRepository.getById(participantData.leader);
           const leaderName = leaderUser?.name ? leaderUser.name.trim().toLowerCase() : null;
-          const normalizedNames = participantData.teamMemberNames.map((n) => (n || "").trim().toLowerCase());
-          const includesLeader = leaderName && normalizedNames.includes(leaderName);
-          totalSize = includesLeader ? participantData.teamMemberNames.length : 1 + participantData.teamMemberNames.length;
+          const includesLeader = leaderName && uniqueNames.map(n => n.toLowerCase()).includes(leaderName);
+          totalSize = includesLeader ? uniqueNames.length : 1 + uniqueNames.length;
         } catch (err) {
-          // If leader fetch fails, assume frontend included leader name (safe default), use length as provided
-          totalSize = participantData.teamMemberNames.length;
+          // If leader fetch fails, assume frontend included leader name (safe default), use uniqueNames length
+          totalSize = uniqueNames.length;
         }
+        // Ensure names array kept in consistent, unique, trimmed format
+        participantData.teamMemberNames = uniqueNames;
         if (event.minTeamSize > 1) {
           if (totalSize < event.minTeamSize) {
             throw new BadRequestError(`Team must have at least ${event.minTeamSize} members`);
@@ -152,9 +159,11 @@ class ParticipantService {
         }
         // Ensure teamSize aligns with provided names. Keep leader-only members array and set teamSize.
         participantData.members = [participantData.leader];
-        participantData.teamSize = participantData.teamSize && participantData.teamSize > 0
-          ? participantData.teamSize
-          : totalSize;
+        // Overwrite teamSize by computed totalSize to ensure correctness even if frontend value was inconsistent
+        if (participantData.teamSize && participantData.teamSize !== totalSize) {
+          console.warn(`ParticipantService.register: provided teamSize (${participantData.teamSize}) does not match computed totalSize (${totalSize}). Overriding.`);
+        }
+        participantData.teamSize = totalSize;
         // Check leader is not already participating (cannot check unregistered member names)
         await this.#checkExistingParticipation(event, participantData);
       } else {
