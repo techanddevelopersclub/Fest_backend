@@ -152,8 +152,8 @@ class ParticipantService {
             throw new BadRequestError(`Team can have at most ${event.maxTeamSize} members`);
           }
         } else {
-          // Solo event; do not allow named members
-          if (participantData.teamMemberNames.length > 0) {
+          // Solo event; allow teamMemberNames only if they represent the leader alone.
+          if (totalSize !== 1) {
             throw new BadRequestError(`Solo event can have at most 1 member`);
           }
         }
