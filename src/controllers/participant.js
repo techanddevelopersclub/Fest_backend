@@ -60,6 +60,27 @@ class ParticipantController {
     }
   }
 
+  static async adminBulkRegister(req, res, next) {
+    try {
+      const { user } = req;
+      if (!user || user.role !== "admin") {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+
+      const { basicDetails, eventIds } = req.body || {};
+      const createdParticipants = await ParticipantService.adminBulkRegister({
+        basicDetails,
+        eventIds,
+      });
+
+      return res.status(201).json({
+        participants: createdParticipants,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   static async updateAttendance(req, res, next) {
     try {
       const { participantId } = req.params;

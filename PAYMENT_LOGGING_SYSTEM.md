@@ -314,3 +314,4 @@ The system includes optimized indexes for:
 - Database indexes are optimized for common query patterns
 - Pagination is supported for large datasets
 - Export functionality handles large date ranges efficiently
+

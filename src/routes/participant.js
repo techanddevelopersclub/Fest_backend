@@ -23,6 +23,12 @@ router.get(
   AuthMiddleware.requireVerified,
   ParticipantController.getAllByEventId
 );
+router.post(
+  "/admin/bulk",
+  AuthMiddleware.requireLoggedIn,
+  AuthMiddleware.requireVerified,
+  ParticipantController.adminBulkRegister
+);
 router.patch(
   "/:participantId/attendance",
   AuthMiddleware.requireLoggedIn,

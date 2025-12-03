@@ -7,10 +7,13 @@ const ParticipantSchema = new mongoose.Schema(
       ref: "Event",
       required: true,
     },
+    // When created via normal user flow, this references the User document.
+    // For admin-created ad-hoc participants, this may be null and we instead
+    // rely on the denormalised leader* fields below.
     leader: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
     isTeam: {
       type: Boolean,
@@ -38,6 +41,23 @@ const ParticipantSchema = new mongoose.Schema(
       type: Number,
       required: false,
       default: 1,
+    },
+    // Basic leader details for admin-created participants who don't have a User account
+    leaderName: {
+      type: String,
+      required: false,
+    },
+    leaderCollege: {
+      type: String,
+      required: false,
+    },
+    leaderMobile: {
+      type: String,
+      required: false,
+    },
+    leaderEmail: {
+      type: String,
+      required: false,
     },
     attendance: {
       type: String,

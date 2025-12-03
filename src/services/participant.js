@@ -78,6 +78,69 @@ class ParticipantService {
     }
   }
 
+  /**
+   * Admin-only bulk registration for ad-hoc participants without User accounts.
+   * This bypasses payment and promo flows and simply creates participants
+   * directly for the specified events.
+   *
+   * @param {{ basicDetails: { name: string, college?: string, mobile?: string, email?: string, teamName?: string, teamMemberNames?: string[] }, eventIds: string[] }} payload
+   */
+  static async adminBulkRegister({ basicDetails, eventIds }) {
+    try {
+      if (!basicDetails || !eventIds || !Array.isArray(eventIds) || eventIds.length === 0) {
+        throw new BadRequestError("Missing basicDetails or eventIds");
+      }
+
+      const { name, college, mobile, email, teamName, teamMemberNames } = basicDetails;
+      if (!name) {
+        throw new BadRequestError("Leader name is required");
+      }
+
+      const cleanTeamMemberNames = Array.isArray(teamMemberNames)
+        ? [...new Set(teamMemberNames.map((m) => (m || "").trim()).filter(Boolean))]
+        : [];
+
+      // Compute team flags
+      const isTeam = !!(teamName || cleanTeamMemberNames.length > 0);
+      const teamSize = Math.max(1, cleanTeamMemberNames.length || 1);
+
+      const created = [];
+      for (const eventId of eventIds) {
+        if (!eventId) continue;
+        const event = await EventRepository.getById(eventId);
+        if (!event) {
+          // Skip invalid events silently
+          // eslint-disable-next-line no-continue
+          continue;
+        }
+
+        const participantDoc = {
+          event: event._id,
+          leader: null,
+          isTeam,
+          teamName: isTeam ? teamName || name : undefined,
+          teamMemberNames: cleanTeamMemberNames,
+          teamSize,
+          leaderName: name,
+          leaderCollege: college,
+          leaderMobile: mobile,
+          leaderEmail: email,
+        };
+
+        const createdParticipant = await ParticipantRepository.create(participantDoc);
+        created.push(createdParticipant);
+      }
+
+      if (created.length === 0) {
+        throw new BadRequestError("No participants were created (invalid events?)");
+      }
+
+      return created;
+    } catch (err) {
+      throw err;
+    }
+  }
+
   static async register(participantData, { promoCode, email }) {
     try {
       console.log("Received participant data:", participantData);
